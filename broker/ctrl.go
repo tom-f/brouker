@@ -21,23 +21,23 @@ func NewCtrl() *Ctrl {
 	}
 }
 
-func (h *Ctrl) Run() {
+func (ctrl *Ctrl) Run() {
 	for {
 		select {
-		case c := <-h.register:
-			h.connections[c] = true
-		case c := <-h.unregister:
-			if _, ok := h.connections[c]; ok {
-				delete(h.connections, c)
-				close(c.send)
+		case conn := <-ctrl.register:
+			ctrl.connections[conn] = true
+		case conn := <-ctrl.unregister:
+			if _, ok := ctrl.connections[conn]; ok {
+				delete(ctrl.connections, conn)
+				close(conn.send)
 			}
-		case m := <-h.broadcast:
-			for c := range h.connections {
+		case m := <-ctrl.broadcast:
+			for conn := range ctrl.connections {
 				select {
-				case c.send <- m:
+				case conn.send <- m:
 				default:
-					delete(h.connections, c)
-					close(c.send)
+					delete(ctrl.connections, conn)
+					close(conn.send)
 				}
 			}
 		}
@@ -48,11 +48,11 @@ type CtrlWriter struct {
 	C *Ctrl
 }
 
-func (wsW CtrlWriter) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+func (ctrlW CtrlWriter) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	p := make([]byte, r.ContentLength)
 	_, err := r.Body.Read(p)
 	if err != nil {
 
 	}
-	wsW.C.broadcast <- p
+	ctrlW.C.broadcast <- p
 }
