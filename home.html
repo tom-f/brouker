@@ -1,0 +1,52 @@
+<html>
+  <head>
+    <title>Build log</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+    <script type="text/javascript">
+        $(document).ready(function() {
+
+        var conn;
+        var log = $("#log");
+
+        function appendLog(msg) {
+            var d = log[0]
+            var doScroll = d.scrollTop == d.scrollHeight - d.clientHeight;
+            msg.appendTo(log)
+            if (doScroll) {
+                d.scrollTop = d.scrollHeight - d.clientHeight;
+            }
+        }
+
+        if (window["WebSocket"]) {
+            conn = new WebSocket("ws://{{$}}/ws");
+            conn.onclose = function(evt) {
+                appendLog($("<div><b>EOF.</b></div>"))
+            }
+            conn.onmessage = function(evt) {
+                appendLog($("<div/>").text(evt.data))
+            }
+        } else {
+            appendLog($("<div><b>WebSockets support required.</b></div>"))
+        }
+        });
+    </script>
+    <style type="text/css">
+      body {
+          overflow: hidden;
+          background: gray;
+      }
+
+      #log {
+          background: white;
+          height: 95%;
+          margin: 15px;
+          padding: 5px;
+          overflow: auto;
+      }
+
+    </style>
+  </head>
+  <body>
+    <div id="log"></div>
+  </body>
+</html>
