@@ -11,7 +11,7 @@ import (
 )
 
 var (
-	addr = flag.String("addr", ":8050", "http service address")
+	addr = flag.String("addr", "0.0.0.0:8050", "http service address")
 )
 
 func homeHandler(c http.ResponseWriter, req *http.Request) {
